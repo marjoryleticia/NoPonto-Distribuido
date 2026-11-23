@@ -1,205 +1,272 @@
-# 🚌 Seu Ônibus, Sua Rota — No Ponto
+# 🚌 No Ponto — Sistema Distribuído para Monitoramento de Ônibus
 
 **Seu ônibus. Sua rota. Seu tempo.**
 
-O **No Ponto** é um sistema desenvolvido para acompanhar ônibus públicos e escolares, permitindo o gerenciamento de veículos, rotas, paradas, usuários e localizações. O objetivo é facilitar o acompanhamento dos transportes e oferecer informações que ajudem os passageiros a organizar melhor seus deslocamentos.
+## 1. Sobre o projeto
 
-## 🎯 Objetivos do projeto
+O **No Ponto** é um sistema desenvolvido com o objetivo de facilitar o acompanhamento de ônibus públicos e escolares.
 
-- Gerenciar os ônibus cadastrados no sistema.
+A proposta é permitir o gerenciamento de veículos, rotas, paradas, usuários e informações de localização, oferecendo aos passageiros uma forma mais prática de acompanhar o transporte.
+
+O projeto está sendo desenvolvido como atividade acadêmica da disciplina de **Fundamentos da Computação Concorrente, Paralela e Distribuída**, explorando a organização dos serviços e o processamento das informações.
+
+## 2. Objetivos
+
+- Gerenciar ônibus, rotas, paradas e usuários.
 - Identificar veículos por meio de RFID.
-- Cadastrar e organizar rotas e paradas.
-- Registrar a localização dos ônibus por GPS.
-- Gerenciar usuários e suas rotas favoritas.
+- Registrar informações de localização utilizando GPS.
+- Disponibilizar informações por meio de uma API.
+- Desenvolver uma interface para visualização dos dados.
+- Explorar conceitos de computação concorrente e distribuída.
 
-## 🛠️ Tecnologias utilizadas
+## 3. Tecnologias utilizadas
 
-- **TypeScript** — linguagem de programação.
-- **Node.js** — ambiente de execução.
-- **NestJS** — framework do backend.
-- **Prisma ORM** — gerenciamento do banco de dados.
-- **PostgreSQL** — sistema gerenciador de banco de dados.
-- **Neon** — hospedagem do PostgreSQL.
-- **bcrypt** — proteção de senhas.
+| Tecnologia | Finalidade |
+|---|---|
+| TypeScript | Linguagem utilizada no desenvolvimento |
+| Node.js | Ambiente de execução do backend |
+| NestJS | Framework para construção da API |
+| TypeORM | Comunicação entre backend e banco de dados |
+| PostgreSQL | Banco de dados relacional |
+| Neon | Hospedagem do banco de dados |
+| React | Construção da interface |
+| Vite | Ambiente de desenvolvimento do frontend |
+| Tailwind CSS | Estilização da interface |
+| Leaflet | Recursos de mapas e localização |
+| Axios | Comunicação HTTP com a API |
+| React Router | Navegação entre páginas |
 
-## 📁 Estrutura do projeto
+## 4. Justificativa das tecnologias escolhidas
 
-```text
-SeuOnibus-SuaRota/
-│
-├── backend/
-│   ├── prisma/
-│   │   ├── migrations/
-│   │   ├── schema.prisma
-│   │   └── seed.js
-│   │
-│   ├── src/
-│   │   ├── onibus/
-│   │   ├── usuarios/
-│   │   ├── rotas/
-│   │   ├── paradas/
-│   │   ├── localizacao/
-│   │   ├── prisma/
-│   │   ├── app.module.ts
-│   │   └── main.ts
-│   │
-│   └── package.json
-│
-├── docs/
-│   └── modelo-de-dados.md
-│
-├── avaliacao/
-└── README.md
+As tecnologias foram escolhidas considerando a facilidade de desenvolvimento, organização do código, integração entre os componentes e possibilidade de expansão do sistema.
+
+- **TypeScript:** permite trabalhar com tipagem, facilitando a manutenção e identificação de erros.
+- **Node.js:** possibilita executar o backend utilizando JavaScript e operações assíncronas.
+- **NestJS:** oferece uma estrutura organizada para desenvolver APIs e separar as responsabilidades do sistema.
+- **TypeORM:** facilita o mapeamento e a manipulação dos dados no banco PostgreSQL.
+- **PostgreSQL:** permite armazenar informações estruturadas e relacionamentos entre as entidades.
+- **Neon:** oferece hospedagem de PostgreSQL na nuvem.
+- **React:** facilita a criação de interfaces dinâmicas e reutilizáveis.
+- **Vite:** proporciona um ambiente rápido para desenvolvimento do frontend.
+- **Tailwind CSS:** facilita a criação e organização dos estilos.
+- **Leaflet:** permite trabalhar com mapas e representar informações geográficas.
+- **Axios:** facilita a realização de requisições HTTP entre frontend e backend.
+- **React Router:** permite organizar a navegação entre as telas.
+
+## 5. Alternativas tecnológicas analisadas
+
+Existem outras tecnologias que poderiam ser utilizadas no desenvolvimento do sistema. Algumas alternativas são:
+
+| Tecnologia escolhida | Alternativa | Justificativa da escolha |
+|---|---|---|
+| NestJS | Express | NestJS oferece uma estrutura mais organizada para separar módulos e responsabilidades. |
+| TypeORM | Prisma | TypeORM foi mantido por já estar integrado ao backend desenvolvido. |
+| PostgreSQL | MySQL | PostgreSQL atende às necessidades de armazenamento e relacionamentos do projeto. |
+| React | Angular | React permite desenvolver a interface utilizando componentes reutilizáveis. |
+| Leaflet | Google Maps | Leaflet permite trabalhar com mapas utilizando uma biblioteca de código aberto. |
+
+Essas alternativas representam possibilidades técnicas de desenvolvimento. A escolha final considera a estrutura já implementada e as necessidades do projeto.
+
+## 6. Arquitetura do sistema
+
+O sistema está organizado em duas partes principais:
+
+- **Backend:** responsável pelas regras de negócio, comunicação com o banco de dados e disponibilização das informações.
+- **Frontend:** responsável pela interface de interação com o usuário.
+
+### Fluxo geral
+
+1. O usuário interage com a interface.
+2. O frontend realiza requisições para a API.
+3. O backend recebe e valida as informações.
+4. O TypeORM realiza a comunicação com o PostgreSQL.
+5. A API retorna os dados para o frontend.
+6. A interface apresenta as informações ao usuário.
+
+```mermaid
+flowchart TD
+    A[Usuário] --> B[Frontend React]
+    B --> C[API NestJS]
+    C --> D[Validação dos dados]
+    D --> E[TypeORM]
+    E --> F[(PostgreSQL / Neon)]
+    F --> E
+    E --> C
+    C --> B
 ```
 
-## ⚙️ Módulos do sistema
+## 7. Backend
+
+O backend foi desenvolvido utilizando NestJS e TypeScript.
+
+Sua responsabilidade é processar as requisições, validar os dados, executar as operações necessárias e realizar a comunicação com o banco de dados.
+
+### Principais módulos
 
 | Módulo | Responsabilidade |
 |---|---|
-| Ônibus | Cadastro, consulta, atualização e remoção de veículos. |
-| Usuários | Gerenciamento de usuários e senhas protegidas com bcrypt. |
-| Rotas | Gerenciamento das rotas de transporte. |
-| Paradas | Cadastro e gerenciamento dos pontos de parada. |
-| Localização | Registro das coordenadas geográficas dos ônibus. |
+| Ônibus | Cadastro, consulta, atualização e exclusão de veículos |
+| Rotas | Gerenciamento das rotas |
+| Paradas | Gerenciamento dos pontos de parada |
+| Localização | Registro das coordenadas dos veículos |
+| Usuários | Gerenciamento dos usuários |
 
-## 🗄️ Banco de dados
+### Funcionalidades implementadas
 
-O projeto utiliza PostgreSQL hospedado na plataforma Neon, com o Prisma ORM para comunicação entre a aplicação e o banco de dados.
+O módulo de ônibus possui operações CRUD:
 
-As principais entidades são:
+- **Create:** cadastro de ônibus.
+- **Read:** consulta dos ônibus cadastrados.
+- **Update:** atualização dos dados.
+- **Delete:** exclusão de veículos.
 
-- **Rota**
-- **Ônibus**
-- **Parada**
-- **Localização**
-- **Usuário**
-- **UsuarioFavoritaRota**
+Também possui validação de dados, filtros por placa e status e paginação na consulta.
 
-A entidade `UsuarioFavoritaRota` representa o relacionamento muitos-para-muitos (N:N) entre usuários e rotas, permitindo que usuários mantenham rotas favoritas.
+## 8. Frontend
 
-### Variáveis de ambiente
+O frontend foi desenvolvido utilizando React, TypeScript e Vite.
 
-A conexão com o banco é configurada por meio de variáveis de ambiente no arquivo `.env`, localizado na pasta `backend`.
+A interface possui uma estrutura de painel administrativo, com navegação lateral e áreas destinadas à apresentação das informações do sistema.
 
-Exemplo de configuração:
+### Elementos da interface
 
-```env
-DATABASE_URL="postgresql://USUARIO:SENHA@HOST/BANCO?sslmode=require"
-DIRECT_URL="postgresql://USUARIO:SENHA@HOST/BANCO?sslmode=require"
-```
+- Painel inicial.
+- Área de gerenciamento de ônibus.
+- Área de rotas.
+- Área de paradas.
+- Indicadores e informações gerais.
+- Espaço destinado à visualização de mapas.
 
-Substitua os valores de exemplo pelas credenciais fornecidas para o ambiente de desenvolvimento.
+O objetivo é oferecer uma interface simples e organizada para facilitar o acesso às funcionalidades.
 
-**Importante:** nunca compartilhe ou envie o arquivo `.env` ao GitHub. Ele contém informações privadas de conexão.
+## 9. Concorrência e distribuição
 
-## 🚀 Como executar o projeto
+A disciplina de Fundamentos da Computação Concorrente, Paralela e Distribuída propõe explorar formas de organizar e executar tarefas computacionais.
 
-### 1. Clonar o repositório
+No contexto do No Ponto, um cenário de aplicação desses conceitos é o recebimento de várias atualizações de localização de ônibus ao mesmo tempo.
+
+O processamento dessas informações pode ser organizado por serviços independentes, permitindo distribuir tarefas e evitar que todas as operações fiquem concentradas em um único componente.
+
+**Observação:** os mecanismos específicos de concorrência e distribuição devem ser descritos conforme forem implementados e testados no projeto. A arquitetura atual identificada no repositório não comprova, por si só, o uso de filas ou workers.
+
+## 10. Custos do projeto
+
+O desenvolvimento prioriza ferramentas gratuitas ou de código aberto.
+
+| Recurso | Tecnologia | Custo |
+|---|---|---|
+| Linguagem | TypeScript | Gratuito |
+| Backend | NestJS e Node.js | Gratuito |
+| ORM | TypeORM | Gratuito |
+| Banco de dados | PostgreSQL | Gratuito (software) |
+| Hospedagem do banco | Neon | Depende do plano utilizado |
+| Frontend | React e Vite | Gratuito |
+| Estilização | Tailwind CSS | Gratuito |
+| Mapas | Leaflet | Gratuito |
+
+Os custos de hospedagem, infraestrutura e eventuais serviços externos devem ser atualizados de acordo com os planos efetivamente utilizados.
+
+## 11. Demonstração do funcionamento
+
+O backend foi executado e testado com o banco PostgreSQL hospedado no Neon.
+
+Foram realizadas operações de cadastro, consulta, atualização e exclusão de ônibus.
+
+Os testes confirmaram:
+
+- Cadastro de ônibus pela API.
+- Consulta dos registros cadastrados.
+- Atualização de informações.
+- Exclusão de registros.
+- Validação dos dados enviados.
+
+### Evidências
+
+Adicionar nesta seção:
+
+- Captura da interface do frontend.
+- Captura da API em execução.
+- Exemplo de cadastro de ônibus.
+- Exemplo de consulta dos dados.
+- Captura do banco de dados.
+- Demonstração dos recursos de concorrência e distribuição, quando implementados.
+
+## 12. Como executar o projeto
+
+### Backend
+
+Acesse a pasta do backend:
 
 ```bash
-git clone https://github.com/eduardoavv/SeuOnibus-SuaRota.git
+cd backend
 ```
 
-### 2. Acessar o backend
-
-```bash
-cd SeuOnibus-SuaRota/backend
-```
-
-### 3. Instalar as dependências
+Instale as dependências:
 
 ```bash
 npm install
 ```
 
-### 4. Configurar as variáveis de ambiente
+Configure as variáveis de ambiente no arquivo `.env`, utilizando as credenciais do banco de dados:
 
-Crie o arquivo `.env` na pasta `backend`, utilizando as variáveis `DATABASE_URL` e `DIRECT_URL`.
-
-### 5. Gerar o Prisma Client
-
-```bash
-npx prisma generate
+```env
+DATABASE_URL="SUA_URL_DO_BANCO"
+DIRECT_URL="SUA_URL_DE_CONEXAO_DIRETA"
 ```
 
-### 6. Aplicar as migrations
-
-Para aplicar migrations já existentes no projeto:
-
-```bash
-npx prisma migrate deploy
-```
-
-Antes de executar esse comando no banco oficial, confirme que o histórico das migrations está validado e compatível com a estrutura existente.
-
-### 7. Popular o banco com dados de exemplo
-
-```bash
-npm run seed
-```
-
-O comando executa o arquivo `prisma/seed.js`, responsável por inserir dados de exemplo.
-
-**Atenção:** execute o seed somente em ambientes de desenvolvimento ou teste, nunca no banco de produção sem autorização e avaliação prévia.
-
-### 8. Iniciar a aplicação
-
-```bash
-npm run start:dev
-```
-
-Após iniciar, a API estará disponível em:
-
-```text
-http://localhost:3000
-```
-
-## 🧪 Testes e validação
-
-Os seguintes comandos estão disponíveis no backend:
-
-Executar testes:
-
-```bash
-npm test
-```
-
-Executar testes de integração:
-
-```bash
-npm run test:e2e
-```
-
-Verificar a compilação:
+Compile o projeto:
 
 ```bash
 npm run build
 ```
 
-Verificar o código:
+Execute as migrations:
 
 ```bash
-npm run lint
+npm run migration:run
 ```
 
-Os resultados dos testes devem ser registrados na documentação do projeto após sua execução em um ambiente compatível.
+Inicie o servidor:
 
-## 📚 Documentação complementar
+```bash
+npm run start:dev
+```
 
-A pasta `docs/` contém a documentação técnica do projeto, incluindo:
+A API ficará disponível em:
 
-- `modelo-de-dados.md`: diagrama entidade-relacionamento, relacionamentos, chaves estrangeiras e regras de integridade.
+```text
+http://localhost:3000
+```
 
-## 👥 Equipe de desenvolvimento
+### Frontend
+
+A pasta do frontend deverá ser adicionada ao repositório.
+
+Após sua inclusão, as instruções de instalação e execução serão documentadas conforme a configuração final do projeto.
+
+## 13. Banco de dados
+
+O sistema utiliza PostgreSQL com TypeORM.
+
+As principais entidades são:
+
+- Rota
+- Ônibus
+- Parada
+- Localização
+- Usuário
+- UsuarioFavoritaRota
+
+A entidade UsuarioFavoritaRota representa o relacionamento entre usuários e rotas favoritas.
+
+## 14. Equipe de desenvolvimento
 
 - **Eduardo Artur**
 - **Emerson Sousa**
 - **Marjory Leticia**
 
-Projeto desenvolvido em equipe como atividade acadêmica do curso de Análise e Desenvolvimento de Sistemas.
-
 ---
 
-**Seu Ônibus, Sua Rota — No Ponto**
+**No Ponto — Seu ônibus. Sua rota. Seu tempo.**
 
-*Seu ônibus. Sua rota. Seu tempo.*
+Projeto acadêmico desenvolvido no curso de Análise e Desenvolvimento de Sistemas.
