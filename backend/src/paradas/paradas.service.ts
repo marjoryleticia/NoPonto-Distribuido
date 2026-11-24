@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 
 import { Parada } from '../database/entities/parada.entity.js';
+import { Rota } from '../database/entities/rota.entity.js';
 import { CreateParadaDto } from './dto/create-parada.dto.js';
 import { UpdateParadaDto } from './dto/update-parada.dto.js';
 
@@ -22,6 +23,9 @@ export class ParadasService {
   constructor(
     @InjectRepository(Parada)
     private readonly paradaRepository: Repository<Parada>,
+
+    @InjectRepository(Rota)
+    private readonly rotaRepository: Repository<Rota>,
   ) {}
 
   async findAll(filtros: FiltrosParadas = {}) {
@@ -46,6 +50,7 @@ export class ParadasService {
 
     const [dados, total] = await this.paradaRepository.findAndCount({
       where,
+      relations: { rota: true },
       skip: (page - 1) * limit,
       take: limit,
       order: { id: 'ASC' },
@@ -61,7 +66,10 @@ export class ParadasService {
   }
 
   async findOne(id: number) {
-    const parada = await this.paradaRepository.findOneBy({ id });
+    const parada = await this.paradaRepository.findOne({
+      where: { id },
+      relations: { rota: true },
+    });
 
     if (!parada) {
       throw new NotFoundException('Parada não encontrada');
@@ -71,12 +79,33 @@ export class ParadasService {
   }
 
   async create(data: CreateParadaDto) {
+    if (data.rotaId != null) {
+      const rota = await this.rotaRepository.findOneBy({
+        id: data.rotaId,
+      });
+
+      if (!rota) {
+        throw new NotFoundException('Rota não encontrada');
+      }
+    }
+
     const parada = this.paradaRepository.create(data);
+
     return this.paradaRepository.save(parada);
   }
 
   async update(id: number, data: UpdateParadaDto) {
     const parada = await this.findOne(id);
+
+    if (data.rotaId != null) {
+      const rota = await this.rotaRepository.findOneBy({
+        id: data.rotaId,
+      });
+
+      if (!rota) {
+        throw new NotFoundException('Rota não encontrada');
+      }
+    }
 
     this.paradaRepository.merge(parada, data);
 

@@ -81,7 +81,7 @@ export class LocalizacaoService {
         relations: { onibus: true },
         skip: (page - 1) * limit,
         take: limit,
-        order: { registradaEm: 'DESC' },
+        order: { registradaEm: 'DESC', id: 'DESC' },
       });
 
     return {
@@ -91,6 +91,28 @@ export class LocalizacaoService {
       limite: limit,
       totalPaginas: Math.ceil(total / limit),
     };
+  }
+
+  async findUltimasPorOnibus() {
+    return this.localizacaoRepository
+      .createQueryBuilder('localizacao')
+      .innerJoinAndSelect('localizacao.onibus', 'onibus')
+      .leftJoinAndSelect('onibus.rota', 'rota')
+      .where((qb) => {
+        const subquery = qb
+          .subQuery()
+          .select('ultima.id')
+          .from(Localizacao, 'ultima')
+          .where('ultima.onibusId = localizacao.onibusId')
+          .orderBy('ultima.registradaEm', 'DESC')
+          .addOrderBy('ultima.id', 'DESC')
+          .limit(1)
+          .getQuery();
+
+        return `localizacao.id = ${subquery}`;
+      })
+      .orderBy('onibus.id', 'ASC')
+      .getMany();
   }
 
   async findOne(id: number) {

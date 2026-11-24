@@ -1,0 +1,334 @@
+
+.rotas-container {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  
+  .rotas-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .rotas-cabecalho h3,
+  .rotas-modal h3 {
+    color: #1e293b;
+    font-size: 20px;
+    font-weight: 700;
+  }
+  
+  .rotas-cabecalho p,
+  .rotas-modal-cabecalho p {
+    color: #64748b;
+    font-size: 14px;
+    margin-top: 4px;
+  }
+  
+  .rotas-botao-principal,
+  .rotas-botao-secundario,
+  .rotas-paginacao button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  
+  .rotas-botao-principal {
+    background: #123b5d;
+    color: white;
+    padding: 12px 18px;
+    font-weight: 600;
+  }
+  
+  .rotas-botao-principal:hover {
+    background: #194d75;
+  }
+  
+  .rotas-botao-principal:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .rotas-estatistica {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: fit-content;
+    min-width: 190px;
+    padding: 18px 22px;
+    background: white;
+    border-radius: 14px;
+    color: #123b5d;
+    box-shadow: 0 2px 8px #0f172a0a;
+  }
+  
+  .rotas-estatistica span {
+    display: block;
+    color: #64748b;
+    font-size: 13px;
+  }
+  
+  .rotas-estatistica strong {
+    display: block;
+    margin-top: 4px;
+    color: #1e293b;
+    font-size: 25px;
+  }
+  
+  .rotas-toolbar {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .rotas-pesquisa {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    padding: 12px 15px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    color: #94a3b8;
+  }
+  
+  .rotas-pesquisa input {
+    width: 100%;
+    outline: none;
+    color: #334155;
+  }
+  
+  .rotas-botao-secundario {
+    padding: 12px;
+    background: white;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .rotas-botao-secundario:hover {
+    background: #f1f5f9;
+  }
+  
+  .rotas-sucesso,
+  .rotas-erro {
+    padding: 13px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+  
+  .rotas-sucesso {
+    color: #166534;
+    background: #f0fdf4;
+  }
+  
+  .rotas-erro {
+    color: #b91c1c;
+    background: #fef2f2;
+  }
+  
+  .rotas-tabela-wrapper {
+    overflow-x: auto;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px #0f172a0a;
+  }
+  
+  .rotas-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+  
+  .rotas-tabela th {
+    padding: 15px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+  }
+  
+  .rotas-tabela td {
+    padding: 16px 15px;
+    color: #475569;
+    font-size: 14px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  
+  .rotas-tabela tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .rotas-nome {
+    color: #1e293b !important;
+    font-weight: 600;
+  }
+  
+  .rotas-vinculo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #475569;
+  }
+  
+  .rotas-acoes {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .rotas-acoes button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border: none;
+    background: transparent;
+    color: #2563eb;
+    cursor: pointer;
+  }
+  
+  .rotas-acoes .rotas-excluir {
+    color: #dc2626;
+  }
+  
+  .rotas-vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 45px 20px;
+    background: white;
+    border-radius: 14px;
+    color: #94a3b8;
+  }
+  
+  .rotas-paginacao {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    color: #64748b;
+    font-size: 14px;
+  }
+  
+  .rotas-paginacao button {
+    padding: 9px 14px;
+    background: white;
+    color: #123b5d;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .rotas-paginacao button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  
+  .rotas-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: #0f172a80;
+    overflow-y: auto;
+  }
+  
+  .rotas-modal {
+    width: 100%;
+    max-width: 500px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    padding: 25px;
+    background: white;
+    border-radius: 16px;
+  }
+  
+  .rotas-modal-cabecalho {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 25px;
+  }
+  
+  .rotas-modal-cabecalho > button {
+    padding: 5px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+  }
+  
+  .rotas-modal form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .rotas-modal label {
+    margin-top: 8px;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .rotas-modal input,
+  .rotas-modal textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    outline: none;
+    color: #334155;
+    font: inherit;
+  }
+  
+  .rotas-modal input:focus,
+  .rotas-modal textarea:focus {
+    border-color: #2563eb;
+  }
+  
+  .rotas-modal textarea {
+    resize: vertical;
+  }
+  
+  .rotas-modal-acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .rotas-cancelar {
+    padding: 12px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: white;
+    color: #475569;
+    cursor: pointer;
+  }
+  
+  @media (max-width: 640px) {
+    .rotas-modal-acoes {
+      flex-direction: column-reverse;
+    }
+  
+    .rotas-modal-acoes button {
+      width: 100%;
+    }
+  
+    .rotas-paginacao {
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+  }
+  

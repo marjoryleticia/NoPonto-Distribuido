@@ -4,12 +4,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { Localizacao } from '../database/entities/localizacao.entity.js';
 import { Onibus } from '../database/entities/onibus.entity.js';
-import { LocalizacaoController } from './localizacao.controller.js';
+import { LocalizacaoController } from './localizacoes.controller.js';
 import { LocalizacaoService } from './localizacao.service.js';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Localizacao, Onibus])],
+  imports: [
+    TypeOrmModule.forFeature([Localizacao, Onibus]),
+  ],
   controllers: [LocalizacaoController],
   providers: [LocalizacaoService],
+  exports: [LocalizacaoService],
 })
-export class LocalizacaoModule {}
+export class LocalizacoesModule {}
