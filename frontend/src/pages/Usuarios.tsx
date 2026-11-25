@@ -9,6 +9,7 @@ import {
   RefreshCw,
   X,
 } from 'lucide-react'
+import api from '../services/api';
 
 type TipoUsuario = 'ALUNO' | 'RESPONSAVEL' | 'ADMIN' | 'PASSAGEIRO'
 
@@ -19,7 +20,7 @@ type Usuario = {
   tipo: TipoUsuario
 }
 
-const API = 'http://localhost:3000/usuarios'
+
 
 const tiposUsuario: { value: TipoUsuario; label: string }[] = [
   { value: 'ALUNO', label: 'Aluno' },
@@ -44,30 +45,25 @@ function Usuarios() {
   const [senha, setSenha] = useState('')
   const [tipo, setTipo] = useState<TipoUsuario>('PASSAGEIRO')
 
-  async function carregarUsuarios() {
-    try {
-      setCarregando(true)
-      setErro('')
+async function carregarUsuarios() {
+  try {
+    setCarregando(true)
+    setErro('')
 
-      const resposta = await fetch(API)
+    const resposta = await api.get('/usuarios')
+    const dados = resposta.data
 
-      if (!resposta.ok) {
-        throw new Error('Não foi possível carregar os usuários.')
-      }
-
-      const dados = await resposta.json()
-      setUsuarios(Array.isArray(dados) ? dados : dados.dados ?? [])
-    } catch (error) {
-      setErro(
-        error instanceof Error
-          ? error.message
-          : 'Erro ao conectar com a API.',
-      )
-    } finally {
-      setCarregando(false)
-    }
+    setUsuarios(Array.isArray(dados) ? dados : dados.dados ?? [])
+  } catch (error: any) {
+    setErro(
+      error.response?.data?.message
+        ? String(error.response.data.message)
+        : 'Erro ao conectar com a API.',
+    )
+  } finally {
+    setCarregando(false)
   }
-
+}
   useEffect(() => {
     carregarUsuarios()
   }, [])
@@ -102,114 +98,91 @@ function Usuarios() {
     setSenha('')
   }
 
-  async function salvarUsuario(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+ async function salvarUsuario(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault()
 
-    try {
-      setSalvando(true)
-      setErro('')
-      setMensagem('')
+  try {
+    setSalvando(true)
+    setErro('')
+    setMensagem('')
 
-      const editando = usuarioEditando !== null
+    const editando = usuarioEditando !== null
 
-      const dados: {
-        nome: string
-        email: string
-        tipo: TipoUsuario
-        senha?: string
-      } = {
-        nome: nome.trim(),
-        email: email.trim(),
-        tipo,
-      }
-
-      if (!editando || senha.trim()) {
-        dados.senha = senha
-      }
-
-      const resposta = await fetch(
-        editando ? `${API}/${usuarioEditando.id}` : API,
-        {
-          method: editando ? 'PUT' : 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(dados),
-        },
-      )
-
-      const resultado = await resposta.json().catch(() => ({}))
-
-      if (!resposta.ok) {
-        throw new Error(
-          resultado.message
-            ? String(
-                Array.isArray(resultado.message)
-                  ? resultado.message.join(', ')
-                  : resultado.message,
-              )
-            : 'Não foi possível salvar o usuário.',
-        )
-      }
-
-      setMensagem(
-        editando
-          ? 'Usuário atualizado com sucesso!'
-          : 'Usuário cadastrado com sucesso!',
-      )
-
-      fecharFormulario()
-      await carregarUsuarios()
-    } catch (error) {
-      setErro(
-        error instanceof Error
-          ? error.message
-          : 'Erro ao salvar usuário.',
-      )
-    } finally {
-      setSalvando(false)
+    const dados: {
+      nome: string
+      email: string
+      tipo: TipoUsuario
+      senha?: string
+    } = {
+      nome: nome.trim(),
+      email: email.trim(),
+      tipo,
     }
-  }
 
-  async function excluirUsuario(id: number) {
-    const confirmar = window.confirm(
-      'Tem certeza que deseja excluir este usuário?',
+    if (!editando || senha.trim()) {
+      dados.senha = senha
+    }
+
+    if (editando) {
+      await api.put(`/usuarios/${usuarioEditando.id}`, dados)
+    } else {
+      await api.post('/usuarios', dados)
+    }
+
+    setMensagem(
+      editando
+        ? 'Usuário atualizado com sucesso!'
+        : 'Usuário cadastrado com sucesso!',
     )
 
-    if (!confirmar) return
+    fecharFormulario()
+    await carregarUsuarios()
+  } catch (error: any) {
+    const mensagemErro = error.response?.data?.message
 
-    try {
-      setErro('')
-      setMensagem('')
-
-      const resposta = await fetch(`${API}/${id}`, {
-        method: 'DELETE',
-      })
-
-      const resultado = await resposta.json().catch(() => ({}))
-
-      if (!resposta.ok) {
-        throw new Error(
-          resultado.message
-            ? String(
-                Array.isArray(resultado.message)
-                  ? resultado.message.join(', ')
-                  : resultado.message,
-              )
-            : 'Não foi possível excluir o usuário.',
-        )
-      }
-
-      setMensagem('Usuário excluído com sucesso!')
-      await carregarUsuarios()
-    } catch (error) {
-      setErro(
-        error instanceof Error
-          ? error.message
-          : 'Erro ao excluir usuário.',
-      )
-    }
+    setErro(
+      mensagemErro
+        ? String(
+            Array.isArray(mensagemErro)
+              ? mensagemErro.join(', ')
+              : mensagemErro,
+          )
+        : 'Erro ao salvar usuário.',
+    )
+  } finally {
+    setSalvando(false)
   }
+}
+
+async function excluirUsuario(id: number) {
+  const confirmar = window.confirm(
+    'Tem certeza que deseja excluir este usuário?',
+  )
+
+  if (!confirmar) return
+
+  try {
+    setErro('')
+    setMensagem('')
+
+    await api.delete(`/usuarios/${id}`)
+
+    setMensagem('Usuário excluído com sucesso!')
+    await carregarUsuarios()
+  } catch (error: any) {
+    const mensagemErro = error.response?.data?.message
+
+    setErro(
+      mensagemErro
+        ? String(
+            Array.isArray(mensagemErro)
+              ? mensagemErro.join(', ')
+              : mensagemErro,
+          )
+        : 'Erro ao excluir usuário.',
+    )
+  }
+}
 
   const usuariosFiltrados = usuarios.filter((usuario) => {
     const termo = pesquisa.toLowerCase()

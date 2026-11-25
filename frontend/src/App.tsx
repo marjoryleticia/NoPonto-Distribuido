@@ -8,6 +8,7 @@ import {
   Bell,
   Search,
   Menu,
+  X,
   RefreshCw,
   Pencil,
   Trash2,
@@ -15,12 +16,14 @@ import {
 } from 'lucide-react'
 
 import { dashboardService, type DashboardDados } from './services/dashboardService'
-import MapaOnibus from './components/MapaOnibus'
+import MapaOnibus from "./services/componets/MapaOnibus";
 import Rotas from './pages/Rotas'
 import Paradas from './pages/Paradas'
 import Usuarios from './pages/Usuarios'
+import SimuladorOnibus from './pages/SimuladorOnibus'
+import api from './services/api'
 
-type Pagina = 'painel' | 'onibus' | 'rotas' | 'paradas' | 'usuarios'
+type Pagina = 'painel' | 'onibus' | 'rotas' | 'paradas' | 'usuarios'| 'simulador'
 
 type Onibus = {
   id: number
@@ -33,6 +36,7 @@ type Onibus = {
 
 function App() {
   const [pagina, setPagina] = useState<Pagina>('painel')
+  const [menuAberto, setMenuAberto] = useState(false)
   const [onibus, setOnibus] = useState<Onibus[]>([])
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState('')
@@ -69,25 +73,23 @@ function App() {
       setCarregando(true)
       setErro('')
 
-      const resposta = await fetch('http://localhost:3000/onibus')
+      const resposta = await api.get('/onibus')
 
-      if (!resposta.ok) {
-        throw new Error('Não foi possível buscar os ônibus.')
-      }
-
-      const resultado = await resposta.json()
-      setOnibus(resultado.dados ?? [])
-    } catch (error) {
+      setOnibus(resposta.data.dados ?? [])
+    } catch (error: any) {
       setErro(
-        error instanceof Error
-          ? error.message
+        error.response?.data?.message
+          ? String(
+              Array.isArray(error.response.data.message)
+                ? error.response.data.message.join(', ')
+                : error.response.data.message,
+            )
           : 'Erro ao conectar com a API.',
       )
     } finally {
       setCarregando(false)
     }
   }
-
   async function carregarDashboard() {
     try {
       setCarregandoDashboard(true)
@@ -110,36 +112,17 @@ function App() {
 
       const editando = editandoId !== null
 
-      const resposta = await fetch(
-        editando
-          ? `http://localhost:3000/onibus/${editandoId}`
-          : 'http://localhost:3000/onibus',
-        {
-          method: editando ? 'PATCH' : 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            placa,
-            modelo,
-            identificacaoRFID,
-            status,
-          }),
-        },
-      )
+      const dados = {
+        placa,
+        modelo,
+        identificacaoRFID,
+        status,
+      }
 
-      const resultado = await resposta.json()
-
-      if (!resposta.ok) {
-        throw new Error(
-          resultado.message
-            ? String(
-                Array.isArray(resultado.message)
-                  ? resultado.message.join(', ')
-                  : resultado.message,
-              )
-            : 'Não foi possível salvar o ônibus.',
-        )
+      if (editando) {
+        await api.patch(`/onibus/${editandoId}`, dados)
+      } else {
+        await api.post('/onibus', dados)
       }
 
       setMensagem(
@@ -151,10 +134,16 @@ function App() {
       limparFormulario()
       await buscarOnibus()
       await carregarDashboard()
-    } catch (error) {
+    } catch (error: any) {
+      const mensagemErro = error.response?.data?.message
+
       setErro(
-        error instanceof Error
-          ? error.message
+        mensagemErro
+          ? String(
+              Array.isArray(mensagemErro)
+                ? mensagemErro.join(', ')
+                : mensagemErro,
+            )
           : 'Erro ao salvar ônibus.',
       )
     } finally {
@@ -174,38 +163,29 @@ function App() {
   }
 
   async function excluirOnibus(id: number) {
-    const confirmar = window.confirm(
-      'Tem certeza que deseja excluir este ônibus?',
+  const confirmar = window.confirm(
+    'Tem certeza que deseja excluir este ônibus?',
+  )
+
+  if (!confirmar) return
+
+  try {
+    setErro('')
+    setMensagem('')
+
+    await api.delete(`/onibus/${id}`)
+
+    setMensagem('Ônibus excluído com sucesso!')
+    await buscarOnibus()
+    await carregarDashboard()
+  } catch (error: any) {
+    setErro(
+      error.response?.data?.message
+        ? String(error.response.data.message)
+        : 'Não foi possível excluir o ônibus.',
     )
-
-    if (!confirmar) return
-
-    try {
-      setErro('')
-      setMensagem('')
-
-      const resposta = await fetch(
-        `http://localhost:3000/onibus/${id}`,
-        {
-          method: 'DELETE',
-        },
-      )
-
-      if (!resposta.ok) {
-        throw new Error('Não foi possível excluir o ônibus.')
-      }
-
-      setMensagem('Ônibus excluído com sucesso!')
-      await buscarOnibus()
-      await carregarDashboard()
-    } catch (error) {
-      setErro(
-        error instanceof Error
-          ? error.message
-          : 'Erro ao excluir ônibus.',
-      )
-    }
   }
+}
 
   useEffect(() => {
     if (pagina === 'onibus') {
@@ -227,6 +207,7 @@ function App() {
     { id: 'rotas', nome: 'Rotas', icone: Route },
     { id: 'paradas', nome: 'Paradas', icone: MapPin },
     { id: 'usuarios', nome: 'Usuários', icone: Users },
+    { id: 'simulador', nome: 'Rastreamento GPS', icone: MapPin },
   ]
 
   const titulos: Record<Pagina, string> = {
@@ -235,6 +216,7 @@ function App() {
     rotas: 'Rotas',
     paradas: 'Paradas',
     usuarios: 'Usuários',
+    simulador: 'Rastreamento GPS',
   }
 
   return (
@@ -275,7 +257,17 @@ function App() {
       <main className="flex-1 p-5 md:p-8">
         <header className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-3">
-            <Menu className="md:hidden text-slate-700" />
+              <button
+                  onClick={() => setMenuAberto(!menuAberto)}
+                  className="md:hidden p-2 rounded-lg hover:bg-slate-200"
+                  aria-label="Abrir menu"
+                >
+                  {menuAberto ? (
+                    <X size={26} className="text-slate-700" />
+                  ) : (
+                    <Menu size={26} className="text-slate-700" />
+                  )}
+                </button>
             <div>
               <h2 className="text-2xl font-bold text-slate-800">
                 {titulos[pagina]}
@@ -290,7 +282,49 @@ function App() {
             <Bell className="text-slate-600" />
           </button>
         </header>
+        {menuAberto && (
+  <div className="md:hidden fixed inset-0 z-50 bg-black/40">
+    <div className="w-72 max-w-[85%] h-full bg-[#123B5D] text-white p-6 shadow-xl">
+      <div className="flex items-center justify-between mb-10">
+        <div className="flex items-center gap-3">
+          <BusFront size={30} />
+          <h2 className="text-2xl font-bold">No Ponto</h2>
+        </div>
 
+        <button
+          onClick={() => setMenuAberto(false)}
+          aria-label="Fechar menu"
+        >
+          <X size={25} />
+        </button>
+      </div>
+
+      <nav className="space-y-3">
+        {itensMenu.map((item) => {
+          const Icone = item.icone
+
+          return (
+            <button
+              key={item.id}
+              onClick={() => {
+                setPagina(item.id)
+                setMenuAberto(false)
+              }}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl text-left ${
+                pagina === item.id
+                  ? 'bg-white/15'
+                  : 'hover:bg-white/10'
+              }`}
+            >
+              <Icone size={20} />
+              {item.nome}
+            </button>
+          )
+        })}
+      </nav>
+    </div>
+  </div>
+)}
         {pagina === 'painel' && (
           <>
             <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm mb-8">
@@ -555,6 +589,8 @@ function App() {
         {pagina === 'paradas' && <Paradas />}
 
         {pagina === 'usuarios' && <Usuarios />}
+        
+        {pagina === 'simulador' && <SimuladorOnibus />}
       </main>
     </div>
   )

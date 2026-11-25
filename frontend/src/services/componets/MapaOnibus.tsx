@@ -14,6 +14,7 @@ import 'leaflet/dist/leaflet.css';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import api from '../api';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
@@ -123,21 +124,14 @@ export default function MapaOnibus() {
     async function buscarDados() {
       try {
         setErro('');
+            const [respostaParadas, respostaOnibus] = await Promise.all([
+              api.get('/paradas', { params: { page: 1, limit: 100 } }),
+              api.get('/localizacoes/ultimas'),
+            ]);
 
-        const [respostaParadas, respostaOnibus] = await Promise.all([
-          fetch('http://localhost:3000/paradas?page=1&limit=100'),
-          fetch('http://localhost:3000/localizacoes/ultimas'),
-        ]);
+            const resultadoParadas: ResultadoParadas = respostaParadas.data;
 
-        if (!respostaParadas.ok || !respostaOnibus.ok) {
-          throw new Error('Não foi possível carregar os dados do mapa.');
-        }
-
-        const resultadoParadas: ResultadoParadas =
-          await respostaParadas.json();
-
-        const resultadoOnibus: Localizacao[] =
-          await respostaOnibus.json();
+            const resultadoOnibus: Localizacao[] = respostaOnibus.data;
 
         setParadas(resultadoParadas.dados ?? []);
         setLocalizacoes(resultadoOnibus ?? []);

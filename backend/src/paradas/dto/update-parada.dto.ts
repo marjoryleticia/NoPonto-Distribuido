@@ -18,4 +18,8 @@ export class UpdateParadaDto {
   @Min(-180)
   @Max(180)
   longitude?: number;
+
+  @IsOptional()
+  @IsNumber()
+  rotaId?: number;
 }

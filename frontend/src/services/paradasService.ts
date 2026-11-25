@@ -1,9 +1,4 @@
-
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://localhost:3000',
-});
+import api from './api';
 
 export interface Rota {
   id: number;
@@ -45,25 +40,21 @@ export const paradasService = {
 
   buscarPorId: async (id: number) => {
     const response = await api.get<Parada>(`/paradas/${id}`);
-
     return response.data;
   },
 
   criar: async (data: ParadaPayload) => {
     const response = await api.post<Parada>('/paradas', data);
-
     return response.data;
   },
 
   atualizar: async (id: number, data: Partial<ParadaPayload>) => {
     const response = await api.put<Parada>(`/paradas/${id}`, data);
-
     return response.data;
   },
 
   excluir: async (id: number) => {
     const response = await api.delete<Parada>(`/paradas/${id}`);
-
     return response.data;
   },
 };

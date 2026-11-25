@@ -1,6 +1,6 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import type { Parada, ParadaPayload } from '../services/paradasService';
 
 interface Rota {
@@ -43,16 +43,12 @@ export default function ParadaForm({
       try {
         setCarregandoRotas(true);
 
-        const resposta = await axios.get(
-          'http://localhost:3000/rotas',
-          {
-            params: {
-              page: 1,
-              limit: 100,
-            },
+        const resposta = await api.get('/rotas', {
+          params: {
+            page: 1,
+            limit: 100,
           },
-        );
-
+        });
         setRotas(resposta.data.dados ?? []);
       } catch {
         setErro('Não foi possível carregar as rotas cadastradas.');
