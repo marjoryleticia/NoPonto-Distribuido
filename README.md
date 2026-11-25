@@ -6,17 +6,17 @@
 
 O **No Ponto** é um sistema desenvolvido com o objetivo de facilitar o acompanhamento de ônibus públicos e escolares.
 
-A proposta é permitir o gerenciamento de veículos, rotas, paradas, usuários e informações de localização, oferecendo aos passageiros uma forma mais prática de acompanhar o transporte.
+A proposta permite o gerenciamento de veículos, rotas, paradas, usuários e informações de localização, oferecendo uma forma mais prática de acompanhar o transporte.
 
 O projeto está sendo desenvolvido como atividade acadêmica da disciplina de **Fundamentos da Computação Concorrente, Paralela e Distribuída**, explorando a organização dos serviços e o processamento das informações.
 
 ## 2. Objetivos
 
 - Gerenciar ônibus, rotas, paradas e usuários.
-- Identificar veículos por meio de RFID.
+- Permitir a identificação dos veículos por meio de identificadores RFID.
 - Registrar informações de localização utilizando GPS.
 - Disponibilizar informações por meio de uma API.
-- Desenvolver uma interface para visualização dos dados.
+- Desenvolver uma interface para visualização e gerenciamento dos dados.
 - Explorar conceitos de computação concorrente e distribuída.
 
 ## 3. Tecnologias utilizadas
@@ -35,6 +35,7 @@ O projeto está sendo desenvolvido como atividade acadêmica da disciplina de **
 | Leaflet | Recursos de mapas e localização |
 | Axios | Comunicação HTTP com a API |
 | React Router | Navegação entre páginas |
+| Lucide React | Biblioteca de ícones |
 
 ## 4. Justificativa das tecnologias escolhidas
 
@@ -52,6 +53,7 @@ As tecnologias foram escolhidas considerando a facilidade de desenvolvimento, or
 - **Leaflet:** permite trabalhar com mapas e representar informações geográficas.
 - **Axios:** facilita a realização de requisições HTTP entre frontend e backend.
 - **React Router:** permite organizar a navegação entre as telas.
+- **Lucide React:** disponibiliza ícones para a interface.
 
 ## 5. Alternativas tecnológicas analisadas
 
@@ -65,7 +67,7 @@ Existem outras tecnologias que poderiam ser utilizadas no desenvolvimento do sis
 | React | Angular | React permite desenvolver a interface utilizando componentes reutilizáveis. |
 | Leaflet | Google Maps | Leaflet permite trabalhar com mapas utilizando uma biblioteca de código aberto. |
 
-Essas alternativas representam possibilidades técnicas de desenvolvimento. A escolha final considera a estrutura já implementada e as necessidades do projeto.
+Essas alternativas representam possibilidades técnicas de desenvolvimento. A escolha final considera a estrutura implementada e as necessidades do projeto.
 
 ## 6. Arquitetura do sistema
 
@@ -95,6 +97,21 @@ flowchart TD
     C --> B
 ```
 
+### Fluxo do rastreamento GPS
+
+O rastreamento utiliza a localização disponibilizada pelo navegador do celular. As coordenadas são enviadas para a API, armazenadas no banco de dados e utilizadas para representar a posição do ônibus no mapa.
+
+```mermaid
+flowchart TD
+    A[Celular] --> B[Geolocalização do navegador]
+    B --> C[Frontend React]
+    C --> D[API NestJS]
+    D --> E[Validação das coordenadas]
+    E --> F[PostgreSQL / Neon]
+    F --> G[Consulta da localização]
+    G --> H[Exibição no mapa]
+```
+
 ## 7. Backend
 
 O backend foi desenvolvido utilizando NestJS e TypeScript.
@@ -108,25 +125,56 @@ Sua responsabilidade é processar as requisições, validar os dados, executar a
 | Ônibus | Cadastro, consulta, atualização e exclusão de veículos |
 | Rotas | Gerenciamento das rotas |
 | Paradas | Gerenciamento dos pontos de parada |
-| Localização | Registro das coordenadas dos veículos |
+| Localização | Registro e consulta das coordenadas dos veículos |
 | Usuários | Gerenciamento dos usuários |
 
 ### Funcionalidades implementadas
 
-O módulo de ônibus possui operações CRUD:
+Os módulos possuem operações de gerenciamento de dados (CRUD):
 
-- **Create:** cadastro de ônibus.
-- **Read:** consulta dos ônibus cadastrados.
-- **Update:** atualização dos dados.
-- **Delete:** exclusão de veículos.
+- **Create:** cadastro de registros.
+- **Read:** consulta e listagem de registros.
+- **Update:** atualização de informações.
+- **Delete:** exclusão de registros.
 
-Também possui validação de dados, filtros por placa e status e paginação na consulta.
+O módulo de ônibus também possui validação de dados, filtros por placa e status e paginação na consulta.
+
+### Endpoints do módulo de Ônibus
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| POST | `/onibus` | Cadastrar ônibus |
+| GET | `/onibus` | Listar ônibus |
+| GET | `/onibus/:id` | Consultar ônibus por ID |
+| PATCH | `/onibus/:id` | Atualizar ônibus |
+| DELETE | `/onibus/:id` | Excluir ônibus |
+
+### Rastreamento GPS
+
+O módulo de localização permite:
+
+- Capturar a localização utilizando a Geolocation API do navegador.
+- Enviar latitude e longitude para o backend.
+- Validar as coordenadas recebidas.
+- Associar a localização a um ônibus cadastrado.
+- Armazenar os registros no PostgreSQL.
+- Consultar as últimas localizações e exibir a posição no mapa.
+
+O rastreamento foi testado utilizando um celular, com autorização de acesso à localização pelo navegador.
+
+### Identificação por RFID
+
+O projeto prevê a utilização de RFID para identificação dos ônibus.
+
+Atualmente, o sistema possui o campo de identificação RFID associado ao cadastro do veículo. Entretanto, a leitura automática por meio de um dispositivo físico ainda não foi integrada.
+
+A integração com leitores RFID poderá ser desenvolvida em uma etapa futura.
 
 ## 8. Frontend
 
 O frontend foi desenvolvido utilizando React, TypeScript e Vite.
 
-A interface possui uma estrutura de painel administrativo, com navegação lateral e áreas destinadas à apresentação das informações do sistema.
+A interface possui uma estrutura de painel administrativo, com navegação lateral e áreas destinadas à apresentação e ao gerenciamento das informações do sistema.
 
 ### Elementos da interface
 
@@ -134,8 +182,9 @@ A interface possui uma estrutura de painel administrativo, com navegação later
 - Área de gerenciamento de ônibus.
 - Área de rotas.
 - Área de paradas.
-- Indicadores e informações gerais.
-- Espaço destinado à visualização de mapas.
+- Área de usuários.
+- Rastreamento GPS.
+- Visualização de localização dos ônibus no mapa.
 
 O objetivo é oferecer uma interface simples e organizada para facilitar o acesso às funcionalidades.
 
@@ -147,7 +196,7 @@ No contexto do No Ponto, um cenário de aplicação desses conceitos é o recebi
 
 O processamento dessas informações pode ser organizado por serviços independentes, permitindo distribuir tarefas e evitar que todas as operações fiquem concentradas em um único componente.
 
-**Observação:** os mecanismos específicos de concorrência e distribuição devem ser descritos conforme forem implementados e testados no projeto. A arquitetura atual identificada no repositório não comprova, por si só, o uso de filas ou workers.
+**Observação:** os mecanismos específicos de concorrência e distribuição devem ser descritos conforme forem implementados e testados no projeto. A arquitetura atual não comprova, por si só, o uso de filas ou workers.
 
 ## 10. Custos do projeto
 
@@ -159,26 +208,38 @@ O desenvolvimento prioriza ferramentas gratuitas ou de código aberto.
 | Backend | NestJS e Node.js | Gratuito |
 | ORM | TypeORM | Gratuito |
 | Banco de dados | PostgreSQL | Gratuito (software) |
-| Hospedagem do banco | Neon | Depende do plano utilizado |
+| Hospedagem do banco | Neon | Conforme o plano utilizado |
 | Frontend | React e Vite | Gratuito |
 | Estilização | Tailwind CSS | Gratuito |
 | Mapas | Leaflet | Gratuito |
 
 Os custos de hospedagem, infraestrutura e eventuais serviços externos devem ser atualizados de acordo com os planos efetivamente utilizados.
 
+O projeto acadêmico utiliza ferramentas de desenvolvimento e serviços disponíveis para testes. Uma implantação em ambiente real poderá exigir custos adicionais, como hospedagem, equipamentos GPS e leitores RFID.
+
 ## 11. Demonstração do funcionamento
 
-O backend foi executado e testado com o banco PostgreSQL hospedado no Neon.
+O sistema foi executado e testado utilizando o backend NestJS, o frontend React e o banco PostgreSQL hospedado no Neon.
 
-Foram realizadas operações de cadastro, consulta, atualização e exclusão de ônibus.
+Foram realizados testes das operações de cadastro, consulta, atualização e exclusão nos módulos de:
 
-Os testes confirmaram:
+- Ônibus.
+- Rotas.
+- Paradas.
+- Usuários.
 
-- Cadastro de ônibus pela API.
-- Consulta dos registros cadastrados.
+Também foi realizado o teste de rastreamento GPS utilizando um celular.
+
+### Resultados dos testes
+
+- Cadastro de registros pela interface.
+- Consulta e listagem dos dados.
 - Atualização de informações.
 - Exclusão de registros.
 - Validação dos dados enviados.
+- Captura e envio de coordenadas GPS.
+- Armazenamento da localização no banco de dados.
+- Exibição da posição do ônibus no mapa.
 
 ### Evidências
 
@@ -189,9 +250,16 @@ Adicionar nesta seção:
 - Exemplo de cadastro de ônibus.
 - Exemplo de consulta dos dados.
 - Captura do banco de dados.
+- Captura do rastreamento GPS pelo celular.
 - Demonstração dos recursos de concorrência e distribuição, quando implementados.
 
 ## 12. Como executar o projeto
+
+### Pré-requisitos
+
+- Node.js e npm instalados.
+- Acesso ao banco PostgreSQL hospedado no Neon.
+- Git instalado.
 
 ### Backend
 
@@ -240,33 +308,77 @@ http://localhost:3000
 
 ### Frontend
 
-A pasta do frontend deverá ser adicionada ao repositório.
+Em outro terminal, acesse a pasta do frontend:
 
-Após sua inclusão, as instruções de instalação e execução serão documentadas conforme a configuração final do projeto.
+```bash
+cd frontend
+```
+
+Instale as dependências:
+
+```bash
+npm install
+```
+
+Configure a variável de ambiente `VITE_API_URL` no arquivo `.env`, apontando para o endereço da API:
+
+```env
+VITE_API_URL="http://localhost:3000"
+```
+
+Inicie o servidor de desenvolvimento:
+
+```bash
+npm run dev
+```
+
+O frontend ficará disponível no endereço informado pelo Vite, normalmente:
+
+```text
+http://localhost:5173
+```
+
+**Observação:** os comandos de execução e as variáveis de ambiente devem corresponder à configuração atual do repositório.
 
 ## 13. Banco de dados
 
-O sistema utiliza PostgreSQL com TypeORM.
+O sistema utiliza PostgreSQL hospedado na plataforma Neon, com TypeORM para comunicação entre a aplicação e o banco de dados.
 
 As principais entidades são:
 
-- Rota
-- Ônibus
-- Parada
-- Localização
-- Usuário
-- UsuarioFavoritaRota
+- Rota.
+- Ônibus.
+- Parada.
+- Localização.
+- Usuário.
+- UsuarioFavoritaRota.
 
-A entidade UsuarioFavoritaRota representa o relacionamento entre usuários e rotas favoritas.
+A entidade `UsuarioFavoritaRota` representa o relacionamento muitos-para-muitos (N:N) entre usuários e rotas, permitindo que os usuários mantenham rotas favoritas.
 
-## 14. Equipe de desenvolvimento
+As informações de localização são armazenadas e associadas aos ônibus cadastrados.
+
+**Importante:** as credenciais de acesso ao banco de dados devem permanecer no arquivo `.env`, que não deve ser enviado ao GitHub.
+
+## 14. Limitações e trabalhos futuros
+
+Apesar das funcionalidades já desenvolvidas, algumas melhorias podem ser realizadas em etapas futuras:
+
+- Integrar um leitor RFID físico para identificação automática dos ônibus.
+- Integrar equipamentos GPS instalados nos veículos.
+- Aprimorar o acompanhamento da localização em tempo real.
+- Implementar mecanismos específicos de concorrência e distribuição, conforme os requisitos da disciplina.
+- Melhorar a experiência dos passageiros com informações de rotas e previsão de chegada.
+- Preparar o sistema para implantação em ambiente de produção.
+
+## 15. Equipe de desenvolvimento
 
 - **Eduardo Artur**
 - **Emerson Sousa**
+- **Hícaro Luiz**
 - **Marjory Leticia**
+
+Projeto acadêmico desenvolvido em equipe no curso de Análise e Desenvolvimento de Sistemas.
 
 ---
 
 **No Ponto — Seu ônibus. Sua rota. Seu tempo.**
-
-Projeto acadêmico desenvolvido no curso de Análise e Desenvolvimento de Sistemas.
